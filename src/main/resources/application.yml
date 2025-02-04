@@ -10,3 +10,8 @@ ollama:
   model:
     default: "llama3:latest"
     deepseek: "deepseek-r1:7b"
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+  model:
+    default: "gpt-4o-mini"
