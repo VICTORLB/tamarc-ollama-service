@@ -1,178 +1,120 @@
-# Ollama Service API
+# 🦙 Tamarc Ollama Service
 
-## Overview
-Ollama Service API is a Spring Boot application that integrates with Ollama to provide AI-powered text generation. The service is containerized using Docker and orchestrated via Docker Compose, including:
+Tamarc Ollama Service is a Java-based API that integrates with **Ollama** (local AI models) and **OpenAI ChatGPT** to generate AI-powered responses. The project is containerized using Docker for easy deployment.
 
-- **Java Spring Boot API** (Backend Service)
-- **Ollama** (AI Model Service)
-- **Open WebUI** (Web Interface for AI interactions)
+---
 
-This guide explains how to set up, run, and troubleshoot the project.
+## 📌 Features
+- 🌐 **Ollama Integration**: Supports local AI models like **Llama 3**, **DeepSeek**, and others.
+- 🤖 **OpenAI Integration**: Works with **GPT-4o**, **GPT-3.5-turbo**, and other OpenAI models.
+- 🐳 **Docker Support**: Fully containerized setup using `docker-compose`.
+- 🔥 **Customizable Models**: Choose models via `application.yml` or environment variables.
 
 ---
 
 ## 🚀 Getting Started
 
-### **Prerequisites**
-Ensure you have the following installed:
-- [Docker](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- [Java 17+](https://adoptium.net/temurin/releases/)
-
-### **Cloning the Repository**
+### **1️⃣ Clone the Repository**
 ```sh
-git clone https://github.com/your-repo/ollama-service.git
-cd ollama-service
+ git clone https://github.com/VICTORLB/tamarc-ollama-service.git
+ cd tamarc-ollama-service
 ```
 
----
+### **2️⃣ Set Up Environment Variables**
+To avoid exposing your OpenAI API Key in the code, set it as an **environment variable**:
 
-## 📦 Running the Application
-The entire project is containerized. To start the services, simply run:
+**Linux/Mac:**
+```sh
+export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+For Docker, add it in `docker-compose.yml`:
+```yaml
+services:
+  java-api:
+    environment:
+      - OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+### **3️⃣ Build and Run with Docker**
 ```sh
 docker-compose up --build -d
 ```
-This command:
-- Builds and starts all containers.
-- Runs Ollama with the AI model.
-- Starts the Spring Boot API.
-- Launches Open WebUI.
 
-To check if everything is running:
+Check running containers:
 ```sh
 docker ps
 ```
-You should see three containers:
-```
-CONTAINER ID   IMAGE                          PORTS                   NAMES
-xxxxxxxxxxxx   ollamaservice-java-api         0.0.0.0:8080->8080/tcp  java-api
-xxxxxxxxxxxx   ollama                         0.0.0.0:11434->11434/tcp  ollama
-xxxxxxxxxxxx   ghcr.io/open-webui/open-webui  0.0.0.0:3000->3000/tcp  open-webui
-```
 
----
-
-## 🔍 Logs & Debugging
-
-### **Viewing Logs**
-To follow live logs for each service:
+Check logs:
 ```sh
 docker-compose logs -f java-api
-docker-compose logs -f ollama
-docker-compose logs -f open-webui
-```
-To inspect individual container logs:
-```sh
-docker logs -f <container_id>
-```
-
-### **Restarting Services**
-```sh
-docker-compose restart
-```
-
-### **Stopping and Cleaning Up**
-```sh
-docker-compose down -v
-```
-This stops and removes all containers, volumes, and networks.
-
----
-
-## 🔗 API Endpoints
-
-### **1️⃣ Generate Text with Ollama**
-```http
-POST /api/generate
-```
-#### **Request Parameters**
-| Parameter | Type   | Description               |
-|-----------|--------|---------------------------|
-| `model`   | String | AI model name (e.g., `deepseek-coder:6.7b`) |
-| `prompt`  | String | Input text for AI to process |
-
-#### **Example Request**
-```sh
-curl -X POST "http://localhost:8080/api/generate" \
-     -H "Content-Type: application/json" \
-     -d '{"model": "deepseek-coder:6.7b", "prompt": "Explain recursion"}'
-```
-#### **Example Response**
-```json
-{
-    "response": "Recursion is a method where..."
-}
-```
-
-### **2️⃣ Generate Text Using DeepSeek Default Model**
-```http
-POST /api/generate/deepseek
-```
-#### **Request Parameters**
-| Parameter | Type   | Description |
-|-----------|--------|-------------|
-| `prompt`  | String | Input text for AI |
-
-#### **Example Request**
-```sh
-curl -X POST "http://localhost:8080/api/generate/deepseek" \
-     -H "Content-Type: application/json" \
-     -d '{"prompt": "What is AI?"}'
 ```
 
 ---
 
-## ⚙️ Model Configuration & Available Models
-The models used in the project are configured in `application.yml`:
+## 🛠 API Endpoints
 
-📂 **`src/main/resources/application.yml`**
-```yaml
-spring:
-  application:
-    name: "ollamaservice"
-  profiles:
-    active: "dev"
+### **Ollama API** (Local Models)
+| Method | Endpoint | Description |
+|--------|---------|-------------|
+| `POST` | `/api/generate?model={model}&prompt={text}` | Generate response from a custom model |
+| `POST` | `/api/generate/default` | Generate response using the **default model** (Llama 3) |
+| `POST` | `/api/generate/deepseek` | Generate response using **DeepSeek** |
 
-ollama:
-  api:
-    url: "http://localhost:11434/api/generate"
-  model:
-    default: "llama3:latest"
-    deepseek: "deepseek-r1:7b"  # Optimized for lower memory usage
-```
-
-### **Available Ollama Models**
-You can find more models available for Ollama at:
-- **Ollama Model List:** [https://ollama.ai/library](https://ollama.ai/library)
-- **DeepSeek Models:** [https://huggingface.co/deepseek-ai](https://huggingface.co/deepseek-ai)
-
-If you want to change the model, update `application.yml` and restart the application.
+### **OpenAI API** (ChatGPT Integration)
+| Method | Endpoint | Description |
+|--------|---------|-------------|
+| `POST` | `/api/chat?prompt={text}` | Generate response using OpenAI's GPT-4o or GPT-3.5-turbo |
 
 ---
 
-## 🛠 Example Tests
-To test the API using **Postman** or **cURL**, you can use the following examples:
+## 📌 Example API Requests
 
-### **1️⃣ Test Default Model**
+### **Test with Curl**
 ```sh
-curl -X POST "http://localhost:8080/api/generate/default" \
+curl -X POST "http://localhost:8080/api/generate?model=llama3&prompt=Hello" -H "Content-Type: application/json"
+```
+```sh
+curl -X POST "http://localhost:8080/api/chat" \
      -H "Content-Type: application/json" \
      -d '{"prompt": "Tell me a joke"}'
 ```
 
-### **2️⃣ Test DeepSeek Model**
-```sh
-curl -X POST "http://localhost:8080/api/generate/deepseek" \
-     -H "Content-Type: application/json" \
-     -d '{"prompt": "Explain recursion"}'
+### **Test with Postman**
+1. Open **Postman**.
+2. Create a new `POST` request.
+3. URL: `http://localhost:8080/api/chat`
+4. Set Headers: `Content-Type: application/json`
+5. Set Body (JSON):
+```json
+{
+  "prompt": "Tell me a joke"
+}
 ```
+6. Click **Send**.
 
-### **3️⃣ Test Custom Model**
-```sh
-curl -X POST "http://localhost:8080/api/generate" \
-     -H "Content-Type: application/json" \
-     -d '{"model": "mistral:7b", "prompt": "What is AI?"}'
-```
+---
+
+## 🔗 Available AI Models
+### **Ollama (Local Models)**
+- `llama3:latest`
+- `deepseek-r1:7b`
+- `mistral:7b`
+
+### **OpenAI Models**
+- `gpt-4o`
+- `gpt-4o-mini`
+- `gpt-3.5-turbo`
+- `gpt-3.5-turbo-16k`
+
+For a full list of Ollama models, visit: [https://ollama.ai/library](https://ollama.ai/library)
+For OpenAI model details, check: [https://platform.openai.com/docs/models](https://platform.openai.com/docs/models)
 
 ---
 
@@ -199,4 +141,16 @@ You can:
 - Use a smaller model (`deepseek-r1:7b` instead of `deepseek-r1:14b`).
 - Increase Docker memory allocation (Docker Desktop → Preferences → Resources → Memory → Increase to 12GB+).
 - Use cloud-based Ollama for larger models.
+
+---
+
+## 📜 License
+MIT License (To be updated)
+
+## 📩 Contact
+_Add your email or contact details here._
+
+---
+
+Now you're ready to use Tamarc Ollama Service! 🚀🔥
 
