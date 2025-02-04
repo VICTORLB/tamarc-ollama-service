@@ -1,0 +1,12 @@
+spring:
+    application:
+        name: "ollamaservice"
+    profiles:
+        active: "dev"
+
+ollama:
+  api:
+    url: "http://localhost:11434/api/generate"
+  model:
+    default: "llama3:latest"
+    deepseek: "deepseek-r1:7b"
